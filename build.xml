@@ -2,7 +2,7 @@
 <project name="ProjectBuild" default="exec">
 	<!-- 导入变量文件 -->
 	<property file="build.properties"/>
-	<!-- 引入ant的逻辑扩展(ant-contrib1.03b) -->
+	<!-- 引入ant的逻辑扩展(对应文件ant-contrib1.03b) -->
 	<taskdef resource="net/sf/antcontrib/antlib.xml"/>
 	<!-- 执行点 -->
 	<target name="exec">
