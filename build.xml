@@ -1,58 +1,62 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project name="ProjectBuild" default="exec">
+<?xml version="1.0" encoding="utf-8"?>
+<project default="exec" name="projectbuild">
 	<!-- 导入变量文件 -->
 	<property file="build.properties"/>
 	<!-- 引入ant的逻辑扩展(对应文件ant-contrib1.03b) -->
 	<taskdef resource="net/sf/antcontrib/antlib.xml"/>
+
+	<!-- 设置依赖 -->
+	<path id="reference.classpath">
+		<pathelement location="${out.dir}"/>
+		<fileset dir="${lib.dir}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
 	<!-- 执行点 -->
 	<target name="exec">
 		<!-- antcall+节点执行的好处在于, 方便调试. 可以随时注释某个步骤 -->
 		<antcall target="init"/>
 		<antcall target="compile"/>
 		<antcall target="adjust"/>
-		<antcall target="pack"/>
+		<antcall target="export"/>
 	</target>
 	<target name="init">
 		<echo message="===执行初始化==="/>
-		<echo message="===删除之前打出来的包, 把对应的内容准备好==="/>
-		<delete dir="${build.path}"></delete>
-		<mkdir dir="${build.path}"></mkdir>
-		<echo message="===结束初始化==="/>
-		<echo message="尝试输出变量:"/>
-		<echo message="第1个: ${project.name}"/>
-		<echo message="第2个: ${root.path}"/>
-		<echo message="第3个: ${project.path}"/>
-		<echo message="尝试输出变量结束"/>
+		<delete dir="${build.path}"/>
+		<mkdir dir="${build.path}"/>
+
 	</target>
 	<target name="compile">
 		<echo message="===执行编译过程==="/>
-		<echo message="===通常javac任务, 有时结合循环调用等方式==="/>
-		<javac srcdir="${project.path}" destdir="${build.path}"></javac>
+		<javac destdir="${build.path}" srcdir="${project.path}"/>
+		<javac debug="true" debuglevel="${debuglevel}" destdir="${out.dir}" encoding="${encoding}" includeantruntime="false" source="${compile.version}" target="${compile.version}">
+			<src path="${src.dir}"/>
+			<classpath refid="reference.classpath" />
+			<!-- 设置报错数量 -->
+			<compilerarg value="-Xmaxerrs" />
+			<compilerarg value="10000" />
+		</javac>
 		<echo message="===结束编译过程==="/>
 		<echo message="尝试循环:"/>
-		<foreach list="${value.list}" target="echo" param="var"></foreach>
+		<foreach list="${value.list}" param="var" target="echo"/>
 		<echo message="循环结束"/>
 	</target>
 	<target name="echo">
-		<echo message="===我是循环==="/>
 		<echo message="${var}"/>
 	</target>
 	<target name="adjust">
 		<echo message="===执行调整过程==="/>
-		<echo message="===编译之后, 把.class放在对应目录,调整对应的文件/配置/及目录结构==="/>
-		<copy todir="${build.path}">
+		<copy includeemptydirs="false" todir="${build.path}">
 			<fileset dir="${project.path}">
-				<exclude name="**/*.java"></exclude>
+				<exclude name="**/*.java"/>
 			</fileset>
 		</copy>
-		<echo message="===结束调整过程==="/>
 	</target>
-	<target name="pack">
+	<target name="export">
 		<echo message="===执行打包过程==="/>
-		<echo message="====完成最后的打包==="/>
 		<zip destfile="${build.path}/${project.name}.zip">
 			<fileset dir="${build.path}"/>
 		</zip>
-		<echo message="===结束打包过程==="/>
 	</target>
 </project>
